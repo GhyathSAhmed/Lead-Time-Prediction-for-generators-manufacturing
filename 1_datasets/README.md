@@ -21,8 +21,8 @@ journey from order placement to shipping.
 
 - **Format**: Structured tabular data (.csv or .xlsx)
 - **Purpose**: Predict lead times for generator manufacturing orders
-- **Size**: [To be documented]
-- **Records**: [To be documented]
+- **Size**: [246X22]
+- **Records**: [246]
 
 ### Data Structure & Columns
 
