@@ -1,0 +1,48 @@
+=== DATASET INFO ===
+
+Shape: 242 rows, 17 columns
+
+dtypes:
+order_date                          object
+receiving_ckd_date                  object
+finishing_date                      object
+shipping_date                       object
+lead_time_to_finish                float64
+lead_time_to_ship                  float64
+lead_time_from_ckd                 float64
+canopy_size                         object
+freq_50_60                         float64
+voltage                             object
+genset_size                         object
+engine_type                         object
+engine_model                        object
+alternator_type                     object
+alternator_model                    object
+controller_model                    object
+target_lead_time_to_finish_days    float64
+
+DataFrame.info():
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 242 entries, 0 to 241
+Data columns (total 17 columns):
+ #   Column                           Non-Null Count  Dtype  
+---  ------                           --------------  -----  
+ 0   order_date                       242 non-null    object 
+ 1   receiving_ckd_date               236 non-null    object 
+ 2   finishing_date                   242 non-null    object 
+ 3   shipping_date                    239 non-null    object 
+ 4   lead_time_to_finish              242 non-null    float64
+ 5   lead_time_to_ship                239 non-null    float64
+ 6   lead_time_from_ckd               236 non-null    float64
+ 7   canopy_size                      242 non-null    object 
+ 8   freq_50_60                       240 non-null    float64
+ 9   voltage                          240 non-null    object 
+ 10  genset_size                      242 non-null    object 
+ 11  engine_type                      242 non-null    object 
+ 12  engine_model                     242 non-null    object 
+ 13  alternator_type                  242 non-null    object 
+ 14  alternator_model                 234 non-null    object 
+ 15  controller_model                 242 non-null    object 
+ 16  target_lead_time_to_finish_days  242 non-null    float64
+dtypes: float64(5), object(12)
+memory usage: 32.3+ KB

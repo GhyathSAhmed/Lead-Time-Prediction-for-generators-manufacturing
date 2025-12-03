@@ -11,7 +11,7 @@ This script follows the project data-preparation guidelines:
   saved in `1_datasets/` with a helpful file name.
 
 Typical usage:
-    python prepare_lead_time_dataset.py
+    python prepare_dataset.py
 """
 
 from __future__ import annotations
