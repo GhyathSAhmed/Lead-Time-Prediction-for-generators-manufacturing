@@ -1,0 +1,14 @@
+{
+  "model_name_label": "AdaBoost Regressor",
+  "pipeline_step_name": "AdaBoostRegressor",
+  "estimator_class": "AdaBoostRegressor",
+  "estimator_module": "sklearn.ensemble._weight_boosting",
+  "estimator_params": {
+    "estimator": null,
+    "learning_rate": 1.0,
+    "loss": "linear",
+    "n_estimators": 50,
+    "random_state": 42
+  },
+  "full_pipeline_repr": "AdaBoostRegressor(random_state=42)"
+}

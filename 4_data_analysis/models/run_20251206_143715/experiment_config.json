@@ -1,0 +1,10 @@
+{
+  "target": "target_lead_time_to_finish_days",
+  "train_size": 0.8,
+  "session_id": 42,
+  "fold": 5,
+  "date_features": [
+    "order_date"
+  ],
+  "n_jobs": 1
+}

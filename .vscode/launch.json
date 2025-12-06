@@ -11,7 +11,7 @@
       "program": "-m",
       "args": ["unittest", "${file}"],
       "console": "integratedTerminal",
-      "justMyCode": true
+      "justMyCode": false
     }
   ]
 }

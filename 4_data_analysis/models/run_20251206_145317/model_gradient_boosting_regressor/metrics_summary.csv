@@ -1,0 +1,2 @@
+Model,MAE,MSE,RMSE,R2,RMSLE,MAPE
+Gradient Boosting Regressor,3.32,30.5608,5.5282,0.8582,0.6299,0.7373
