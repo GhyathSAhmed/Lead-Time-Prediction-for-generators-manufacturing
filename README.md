@@ -1,73 +1,370 @@
 # Lead Time Prediction for Generator Manufacturing
 
-## Project Overview
-
 This project aims to develop a machine learning model to predict lead times for
 power generator manufacturing at **AQT Generators**. As a quality and
 procurement engineer, the goal is to improve lead time estimation accuracy and
-enhance customer communication through data-driven predictions.
+enhance customer communication through **data-driven predictions**.
 
-## The Problem
+---
+
+## 1. Problem & Motivation
 
 AQT Generators is a 3-year-old company facing significant challenges with lead
 time estimation:
 
-- **Inconsistent estimates** provided to customers
-- **Lack of infrastructure** to calculate accurate process times
-- **Distributed operations** across multiple manufacturing locations
-- **Outsourced work** components that complicate lead time calculations
+- Inconsistent estimates provided to customers  
+- Lack of infrastructure to calculate accurate process times  
+- Distributed operations across multiple manufacturing locations  
+- Outsourced components that complicate lead-time calculations  
 
-## Our Solution
-
-We are using **AutoML (Automated Machine Learning)** to develop a predictive
-model that learns from historical manufacturing data and accounts for the
-complex factors affecting lead times:
-
-- Multi-location production processes
-- External supplier timelines
-- Varying production conditions
-- Historical lead time patterns
-
-## Why AutoML?
-
-Given AQT's complex manufacturing environment, AutoML is ideal because it:
-
-1. Learns from actual historical timelines rather than theoretical process times
-2. Incorporates location-based variables across distributed operations
-3. Handles missing or incomplete data
-4. Automatically discovers non-obvious patterns in the data
+These issues lead to **missed promises**, **customer frustration**, and
+**internal firefighting** when schedules slip.
 
 ---
 
-## Directory Structure
+## 2. Solution Overview
 
-```plaintext
-/
-├── README.md                   # Project overview (this file)
-├── guide.md                    # Template guidelines
-├── /collaboration/             # Team norms, strategies, and retrospectives
-├── /notes/                     # Shared resources and learning materials
-├── /0_domain_study/            # Domain research and background
-├── /1_datasets/                # Raw and processed datasets
-├── /2_data_preparation/        # Scripts for cleaning and processing data
-├── /3_data_exploration/        # Scripts for initial data understanding
-├── /4_data_analysis/           # Scripts for in-depth analysis
-├── /5_communication_strategy/  # Materials for communicating findings
-└── /6_final_presentation/      # Final presentation materials
+We use historical manufacturing data from AQT’s operations to train an
+**AutoML regression model** (using [PyCaret](https://pycaret.gitbook.io/docs/))
+to predict:
+
+> **Target:** `target_lead_time_to_finish_days`  
+> → The number of days from order placement until generator manufacturing is finished.
+
+The project is designed to be:
+
+- **Reproducible** – Any collaborator can clone the repo, run the scripts, and
+  reproduce the results.
+- **Extensible** – New data or features can be integrated into the same pipeline.
+- **Deployable** – The final model is showcased via a **Streamlit app** and is
+  intended to be integrated into **AQT’s Odoo ERP**.
+
+---
+
+## 3. Tech Stack & Requirements
+
+### 3.1. Core Technologies
+
+- **Python**: 3.12.x  or earlier, (recommend 3.10.X)
+- **Libraries** (installed from `requirements.txt`):
+  - `pycaret`
+  - `pandas`
+  - `numpy`
+  - `matplotlib`
+  - `seaborn`
+  - `streamlit`
+  - plus supporting dependencies (scikit-learn, etc.)
+
+> See [`requirements.txt`](./requirements.txt) for the full, exact list.
+
+### 3.2. Recommended Environment
+
+- OS: Windows (project developed and tested on Windows)
+- Python installed from [python.org](https://www.python.org/) (3.10 recommended)
+- Git for cloning the repository
+- (Optional) VS Code for development, with Python extension installed
+
+---
+
+## 4. Getting Started
+
+### 4.1. Clone the Repository
+
+```bash
+git clone https://github.com/GhyathSAhmed/Lead-Time-Prediction-for-generators-manufacturing.git
+cd Lead-Time-Prediction-for-generators-manufacturing
+````
+
+### 4.2. Create & Activate a Virtual Environment (Recommended)
+
+**Windows (PowerShell):**
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+If you get an *“execution policy”* error, run PowerShell as Administrator:
+
+```bash
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Then try activating the environment again.
+
+### 4.3. Install Dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ---
 
-## Milestones
+## 5. Data & Pipeline: High-Level Flow
 
-- **Milestone 0:** Domain Study (Current)
-- **Milestone 1:** Data Collection
-- **Milestone 2:** Data Preparation
-- **Milestone 3:** Data Exploration & Analysis
-- **Milestone 4:** Model Development & Validation
-- **Milestone 5:** Communication Strategy
-- **Milestone 6:** Final Presentation
+The project follows a clear, staged pipeline:
+
+1. **Domain Study (`0_domain_study/`)**
+
+   - Understand generator manufacturing workflows, locations, dependencies, and
+   pain points.
+   - Document assumptions and business context.
+
+1. **Datasets (`1_datasets/`)**
+
+   - `ELO2_Raw_Data.csv` – original raw manufacturing data.
+   - `ELO2_lead_time_prepared.csv` – cleaned dataset ready for modeling
+   (generated by scripts).
+
+1. **Data Preparation (`2_data_preparation/`)**
+
+   - Main script: `prepare_lead_time_dataset.py`
+   - Tasks:
+
+     - Standardize column names.
+     - Fix mixed date formats:
+
+       - `Order Date` in `dd/mm/yyyy`
+       - Other dates in `mm/dd/yyyy`
+     - Parse all dates into proper `datetime`.
+     - Compute and standardize **target** column:
+
+       - `target_lead_time_to_finish_days`
+     - Detect and drop leakage columns (serial numbers, highly unique IDs).
+     - Drop fully unused rows and rows with missing target.
+     - Save a new prepared dataset to `1_datasets/ELO2_lead_time_prepared.csv`.
+
+1. **Data Exploration (`3_data_exploration/`)**
+
+   - EDA script (see `3_data_exploration/README.md`):
+
+     - Descriptive statistics.
+     - Missing value analysis.
+     - Distribution plots for numeric features.
+     - Count plots for categorical features.
+     - Correlation matrix and heatmap.
+   - All plots and summary files are saved inside `3_data_exploration/` (no
+  modification of datasets).
+
+1. **Data Analysis & Modeling (`4_data_analysis/`)**
+
+   - Main script: `model_lead_time_pycaret.py`
+   - Steps:
+
+     - Load `1_datasets/ELO2_lead_time_prepared.csv`.
+     - Preprocess for modeling:
+
+       - Convert `order_date` from object → datetime.
+       - Drop leakage-prone columns:
+
+         - All other dates (`receiving_ckd_date`, `finishing_date`, `shipping_date`).
+         - Lead-time columns derived from dates (e.g., `lead_time_to_finish`,
+  `lead_time_to_ship`, `lead_time_from_ckd`).
+       - Keep `target_lead_time_to_finish_days` as the modeling target.
+     - Use **PyCaret Regression**:
+
+       - `setup()` with 80/20 split and 5-fold CV.
+       - `compare_models(n_select=5)` to find top candidates.
+       - Finalize the best model and evaluate it.
+     - For each run:
+
+       - Create a new timestamped folder under `4_data_analysis/models/run_YYYYMMDD_HHMMSS/`.
+       - For each of the top models, save:
+
+         - Model pickle (`model.pkl`)
+         - Configuration (`config.json`)
+         - Metrics (`metrics.csv`)
+         - PyCaret comparison table (`comparison_metrics.csv`)
+         - Optional plots (`residuals`, `error`, `feature`, `learning`), where available.
+       - Additionally, save the **best overall model** of that run to:
+
+         - `4_data_analysis/models/run_YYYYMMDD_HHMMSS/best_model.pkl`
+
+1. **Communication Strategy & App (`5_communication_strategy/`)**
+
+   - A **Streamlit** app demonstrates how the trained model can be used interactively.
+
+   - The app:
+
+     - Loads the prepared dataset (for categorical options and date behavior).
+     - Loads a saved **best model** from `4_data_analysis/models/.../best_model.pkl`.
+     - Provides an input form for the key features used by PyCaret.
+     - Runs `predict_model()` internally and displays the estimated
+       `target_lead_time_to_finish_days` as:
+
+       > “Estimated Lead Time to Finish (days)”
+
+   - This app is the main **demo artifact** for:
+
+     - AQT factory manager & general manager.
+     - System administrator (to help integrate into **Odoo ERP**, which also
+  uses Python).
+
+1. **Final Presentation (`6_final_presentation/`)**
+
+   - Slides, report, or other materials summarizing:
+
+     - Business problem.
+     - Data pipeline.
+     - Modeling results.
+     - Impact and deployment plan.
 
 ---
 
-**Last Updated:** December 2, 2025
+## 6. How to Run the Main Scripts
+
+> ⚠️ All commands below assume you are in the repository root and your virtual
+> environment is **activated**.
+
+### 6.1. Step 1 – Prepare the Dataset
+
+```bash
+cd 2_data_preparation
+python prepare_lead_time_dataset.py
+```
+
+This will read the raw dataset from `1_datasets/ELO2_Raw_Data.csv` and create:
+
+- `1_datasets/ELO2_lead_time_prepared.csv`
+
+### 6.2. Step 2 – Run Exploratory Data Analysis (EDA)
+
+```bash
+cd ../3_data_exploration
+python explore_lead_time_dataset.py
+```
+
+Outputs (for example):
+
+- `dataset_info.txt`
+- `missing_values.csv`
+- Plots such as:
+
+  - `bar_engine_type.png`
+  - `corr_heatmap_full.png`
+
+> See `3_data_exploration/README.md` for the exact script name and outputs.
+
+### 6.3. Step 3 – Train & Evaluate Models with PyCaret
+
+```bash
+cd ../4_data_analysis
+python model_lead_time_pycaret.py
+```
+
+This will:
+
+- Load `1_datasets/ELO2_lead_time_prepared.csv`
+- Train multiple regression models and compare them
+- Create a folder like:
+
+```bash
+4_data_analysis/models/run_2025MMDD_HHMMSS/
+    ├── Gradient Boosting Regressor/
+    │   ├── model.pkl
+    │   ├── config.json
+    │   ├── metrics.csv
+    │   └── (optional plots)
+    ├── Random Forest Regressor/
+    │   └── ...
+    ├── ...
+    └── best_model.pkl
+```
+
+---
+
+## 7. Running the Streamlit App (Demo for Management / ERP Integration)
+
+The Streamlit app lives under `5_communication_strategy/`
+(see the `README.md` in that folder for details).
+
+From the project root:
+
+```bash
+cd 5_communication_strategy
+streamlit run demo_lead_time_app.py
+```
+
+Then open the URL shown in the terminal (usually `http://localhost:8501`).
+
+**What the app does:**
+
+- Lets the user input realistic generator order information:
+
+  - Genset size
+  - Engine model
+  - Alternator model
+  - Canopy type
+  - Voltage, frequency, etc.
+- The app encodes features consistently with PyCaret’s training pipeline (using
+  the stored pipeline inside the saved model).
+- Outputs:
+
+> **Estimated Lead Time to Finish (days)**
+
+This is the **exact value** that can later be plugged into Odoo ERP as an automated lead time suggestion.
+
+---
+
+## 8. Repository Structure Diagram
+
+```bash
+Lead-Time-Prediction-for-generators-manufacturing/
+├── README.md                   # Project overview (this file)
+├── guide.md                    # Starter template guidelines from MIT ET6-CDSP
+├── requirements.txt            # Python dependencies
+├── logs.log                    # Project log (debug / run logs)
+├── .github/                    # CI / linting workflows
+├── .vscode/                    # VS Code settings
+├── .gitignore
+├── .ls-lint.yml                # Linting rules for file names
+├── .markdownlint.yml           # Linting rules for Markdown
+│
+├── collaboration/              # Team norms, strategies, retrospectives
+├── notes/                      # Shared notes, references, learning material
+│
+├── 0_domain_study/             # Domain research and background
+│   └── README.md
+│
+├── 1_datasets/                 # Raw & prepared datasets (never edited in-place)
+│   ├── ELO2_Raw_Data.csv               # Original raw data (source of truth)
+│   └── ELO2_lead_time_prepared.csv     # Prepared dataset for modeling
+│
+├── 2_data_preparation/
+│   ├── prepare_lead_time_dataset.py    # Cleans data and builds target
+│   └── README.md                       # Describes preparation steps & outputs
+│
+├── 3_data_exploration/
+│   ├── <eda_script>.py                 # Full EDA (descriptive stats + plots)
+│   └── README.md                       # What the EDA explores and how
+│
+├── 4_data_analysis/
+│   ├── model_lead_time_pycaret.py      # PyCaret training, comparison, saving runs
+│   ├── models/
+│   │   └── run_YYYYMMDD_HHMMSS/
+│   │       ├── <ModelName>/
+│   │       │   ├── model.pkl
+│   │       │   ├── config.json
+│   │       │   ├── metrics.csv
+│   │       │   └── *.png (optional plots)
+│   │       └── best_model.pkl          # Best model for this run
+│   └── README.md                       # Analysis strategy and interpretation
+│
+├── 5_communication_strategy/
+│   ├── <streamlit_app>.py              # Interactive demo for management / ERP
+│   └── README.md                       # How the communication / app works
+│
+└── 6_final_presentation/
+    └── (slides, report, or final deliverables)
+```
+
+---
+
+## 10. License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+---
+
+Last Updated: December 2025
